@@ -564,7 +564,7 @@ const VALSA = [
 ];
 
 const Som = {
-  ctx:null, master:null, eco:null, ligado:true, timer:null, cursor:0,
+  ctx:null, master:null, eco:null, orq:null, ligado:true, timer:null, cursor:0,
   trilha:null, usandoArquivo:false,
   iniciar(){
     if (this.ctx) return;
@@ -581,24 +581,40 @@ const Som = {
       this.eco = this.ctx.createGain(); this.eco.gain.value = .3;
       this.eco.connect(atraso); atraso.connect(calor);
       this.master.connect(calor); calor.connect(this.ctx.destination);
+      // barramento só da valsa: dá pra apagá-la inteira com um fade
+      this.orq = this.ctx.createGain(); this.orq.gain.value = 1;
+      this.orq.connect(this.master); this.orq.connect(this.eco);
       this.tentarArquivo();
     }catch(e){ this.ctx = null; }
   },
-  /* tenta a música da pasta; se não houver, toca a valsa sintetizada */
+  /* Tenta a música da pasta. Enquanto ela não chega, a valsa cobre o silêncio;
+     quando o arquivo começa a tocar — mesmo tarde, numa conexão ruim —
+     a valsa sai de cena num fade em vez de tocar junto. */
   tentarArquivo(){
     if (!MUSICA) return this.valsa();
     const a = new Audio(MUSICA);
     a.loop = true; a.volume = 0; a.preload = "auto";
-    let decidido = false;
-    const usar = () => {
-      if (decidido) return; decidido = true;
-      this.trilha = a; this.usandoArquivo = true; this.subirVolume();
-    };
-    const desistir = () => { if (decidido) return; decidido = true; this.valsa(); };
-    a.addEventListener("playing", usar, {once:true});
-    a.addEventListener("error", desistir, {once:true});
-    a.play().catch(desistir);
-    setTimeout(()=>{ if (!decidido) desistir(); }, 3000);
+    a.crossOrigin = "anonymous";
+    let desistiu = false;
+    a.addEventListener("playing", () => {
+      if (this.usandoArquivo) return;
+      this.trilha = a; this.usandoArquivo = true;
+      this.calarValsa();
+      this.subirVolume();
+    });
+    a.addEventListener("error", () => {                  // sem arquivo: valsa e ponto
+      desistiu = true; a.removeAttribute("src");
+      this.valsa();
+    });
+    a.play().catch(()=>{ if (!this.usandoArquivo) this.valsa(); });
+    setTimeout(()=>{ if (!desistiu && !this.usandoArquivo) this.valsa(); }, 2200);
+  },
+  calarValsa(){
+    if (this.timer){ clearInterval(this.timer); this.timer = null; }
+    if (!this.orq) return;
+    const t = this.ctx.currentTime;
+    this.orq.gain.setValueAtTime(this.orq.gain.value, t);
+    this.orq.gain.linearRampToValueAtTime(0, t + 2.5);   // apaga tudo que já foi agendado
   },
   subirVolume(alvo=.5){                                  // entra em fade, sem susto
     const a = this.trilha; if (!a) return;
@@ -609,30 +625,37 @@ const Som = {
     }, 60);
   },
   valsa(){
-    if (this.timer) return;
+    if (this.timer || this.usandoArquivo) return;
+    if (this.orq){                                       // devolve o volume se já saiu de cena
+      const t = this.ctx.currentTime;
+      this.orq.gain.cancelScheduledValues(t);
+      this.orq.gain.setValueAtTime(1, t);
+    }
     this.volta();
     this.timer = setInterval(()=>this.volta(), VALSA.length*COMPASSO*1000 - 500);
   },
-  /* piano: ataque rápido, cauda longa */
-  nota(freq, inicio, dur, volume, comEco=true){
+  /* piano: ataque rápido, cauda longa.
+     destino = barramento da valsa; sem ele, vai direto pro master (efeitos) */
+  nota(freq, inicio, dur, volume, destino){
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = "triangle"; o.frequency.value = freq;
     g.gain.setValueAtTime(.0001, inicio);
     g.gain.exponentialRampToValueAtTime(volume, inicio + .02);
     g.gain.exponentialRampToValueAtTime(.0001, inicio + dur);
-    o.connect(g); g.connect(this.master);
-    if (comEco) g.connect(this.eco);
+    o.connect(g);
+    if (destino) g.connect(destino);
+    else { g.connect(this.master); g.connect(this.eco); }
     o.start(inicio); o.stop(inicio + dur + .05);
   },
   /* cordas: entra devagar por baixo do piano */
-  corda(freq, inicio, dur, volume){
+  corda(freq, inicio, dur, volume, destino){
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
     o.type = "sine"; o.frequency.value = freq;
     o.detune.value = (Math.random()*7) - 3.5;             // desafina de leve: soa humano
     g.gain.setValueAtTime(0, inicio);
     g.gain.linearRampToValueAtTime(volume, inicio + 1.6);
     g.gain.linearRampToValueAtTime(0, inicio + dur);
-    o.connect(g); g.connect(this.master);
+    o.connect(g); g.connect(destino || this.master);
     o.start(inicio); o.stop(inicio + dur + .1);
   },
   volta(){
@@ -641,14 +664,14 @@ const Som = {
     if (this.cursor < agora + .1) this.cursor = agora + .15;
     VALSA.forEach((c, i) => {
       const t = this.cursor + i*COMPASSO;
-      this.nota(c.baixo, t, 2.6, .12, false);             // o "oom"
-      [2,4].forEach(p => c.acorde.forEach((f,k) =>        // o "pah pah"
-        this.nota(f, t + p*COLCHEIA, 1.5, .035/(k*.4+1), false)));
-      this.corda(c.baixo*2, t, COMPASSO*1.4, .04);        // almofada
+      this.nota(c.baixo, t, 2.6, .12, this.orq);          // o "oom"
+      [2,4].forEach(p => c.acorde.forEach((f,k) =>         // o "pah pah"
+        this.nota(f, t + p*COLCHEIA, 1.5, .035/(k*.4+1), this.orq)));
+      this.corda(c.baixo*2, t, COMPASSO*1.4, .04, this.orq); // almofada
       c.melodia.forEach(([f, pos, comp]) => {
         const q = t + pos*COLCHEIA;
-        this.nota(f, q, comp*COLCHEIA + 1.3, .105);
-        this.nota(f*2, q, .55, .016);                     // brilho do martelo
+        this.nota(f, q, comp*COLCHEIA + 1.3, .105, this.orq);
+        this.nota(f*2, q, .55, .016, this.orq);           // brilho do martelo
       });
     });
     this.cursor += VALSA.length * COMPASSO;
