@@ -26,10 +26,16 @@ body{
   color:var(--pergaminho);
   font-family:var(--sans);
   overflow:hidden;
+  touch-action:manipulation;          /* toque rápido não vira zoom de duplo-toque */
   -webkit-tap-highlight-color:transparent;
   -webkit-font-smoothing:antialiased;
 }
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button{
+  font:inherit;color:inherit;background:none;border:0;cursor:pointer;
+  touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+}
+#palco{-webkit-user-select:none;user-select:none}
 :focus-visible{outline:2px solid var(--vela);outline-offset:3px;border-radius:4px}
 
 /* ══ camadas ══ */
@@ -215,8 +221,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 }
 .contador .leg{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--pergaminho-fraco)}
 .joelho{
-  margin-top:30px;padding:15px 30px;border:1px solid var(--linha);border-radius:99px;
-  font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--vela);
+  margin-top:30px;padding:19px 38px;border:1px solid var(--linha);border-radius:99px;
+  font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--vela);
+  background:rgba(233,184,114,.07);
   transition:transform .1s,background .2s;
 }
 .joelho:active{transform:scale(.95);background:rgba(233,184,114,.12)}
@@ -267,6 +274,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 #poema .verso{
   font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.6;
   color:var(--vela);margin:0 0 26px;padding-left:14px;border-left:1px solid var(--linha);
+}
+#poema .verso .ref{
+  display:block;margin-top:9px;font-family:var(--sans);font-style:normal;
+  font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--pergaminho-fraco);
 }
 #poema .texto{
   font-family:var(--serif);font-size:clamp(19px,5.2vw,22px);line-height:1.72;
@@ -366,7 +377,7 @@ const q = new URLSearchParams(location.search);
 if (q.get("nome")) NOME = q.get("nome");
 if (q.get("de"))   DE   = q.get("de");
 
-const ARQUIVO = NOME ? `para_${NOME.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"")}.exe` : "para_ela.exe";
+const ARQUIVO = NOME ? `para_${NOME.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"")}` : "para_ela";
 
 /* ── os 10 níveis ────────────────────────────────────── */
 const NIVEIS = [
@@ -374,7 +385,7 @@ const NIVEIS = [
     mec:"luzes", n:3, rotulo:"Toque nas três luzes que ficaram acesas por você",
     ecos:["uma prece","outra prece","mais uma"],
     titulo:"Antes de te conhecer",
-    verso:"“Antes que eu te formasse no ventre materno, eu já te conhecia.” — Jeremias 1:5",
+    verso:"“Antes que eu te formasse no ventre materno, eu já te conhecia.”", ref:"Jeremias 1:5",
     poema:`Antes de eu saber o teu nome,
 eu já sabia o teu lugar:
 era aquele espaço quieto no peito
@@ -382,8 +393,8 @@ que ninguém nunca soube ocupar.
 
 Deus te conheceu antes de mim.
 Te desenhou sem pressa,
-escolheu o teu riso, o teu jeito de olhar de lado,
-e guardou pra depois —
+escolheu o teu riso, o teu jeito de olhar,
+e guardou pra depois,
 pra quando eu já estivesse pronto
 pra saber cuidar.`
   },
@@ -391,7 +402,7 @@ pra saber cuidar.`
     mec:"contar", alvo:1000, rotulo:"Quantas vezes eu orei por você? Toque e descubra",
     legenda:"orações", botao:"orar de novo",
     titulo:"Quantas vezes eu orei",
-    verso:"“Deleita-te também no Senhor, e Ele te concederá o que deseja o teu coração.” — Salmos 37:4",
+    verso:"“Deleita-te também no Senhor, e Ele te concederá o que deseja o teu coração.”", ref:"Salmos 37:4",
     poema:`Eu perdi a conta dos joelhos no chão.
 Foram madrugadas inteiras pedindo por alguém
 que eu ainda nem sabia que existia.
@@ -404,9 +415,9 @@ Só estava te preparando com o capricho
 de quem não faz nada às pressas.`
   },
   {
-    mec:"arrastar", rotulo:"Arraste devagar — como quem abre uma cortina", texto:"abrir",
+    mec:"arrastar", rotulo:"Arraste devagar, como quem abre uma cortina", texto:"abrir",
     titulo:"Achei",
-    verso:"“Achei aquele a quem a minha alma ama.” — Cânticos 3:4",
+    verso:"“Achei aquele a quem a minha alma ama.”", ref:"Cânticos 3:4",
     poema:`Eu li esse versículo a vida inteira
 sem entender direito o verbo.
 
@@ -422,11 +433,11 @@ Eu te reconheci.`
   {
     mec:"segurar", seg:4, rotulo:"Segure. Sem pressa nenhuma.",
     titulo:"O tempo",
-    verso:"“Tudo fez formoso no seu devido tempo.” — Eclesiastes 3:11",
+    verso:"“Tudo fez formoso no seu devido tempo.”", ref:"Eclesiastes 3:11",
     poema:`Eu não tenho pressa nenhuma com você.
 Pode demorar o quanto precisar demorar.
-Eu não cheguei aqui atrás de um sim rápido —
-eu cheguei aqui pra ficar.
+Eu não cheguei aqui atrás de um sim rápido.
+Eu cheguei aqui pra ficar.
 
 Se for preciso um mês, eu espero.
 Se for preciso um ano, eu espero.
@@ -438,7 +449,7 @@ e eu quero que a gente tenha o tamanho do tempo.`
     mec:"medos", rotulo:"Toque em cada um. Eu quebro todos.",
     itens:["medo de recomeçar","medo de confiar","medo de se decepcionar","medo de não ser prioridade","medo de amar de novo"],
     titulo:"Os medos",
-    verso:"“No amor não há medo; antes o perfeito amor lança fora o medo.” — 1 João 4:18",
+    verso:"“No amor não há medo; antes o perfeito amor lança fora o medo.”", ref:"1 João 4:18",
     poema:`Eu sei que tem medo aí dentro.
 Medo de se abrir de novo,
 de confiar e ter que recolher os pedaços sozinha.
@@ -452,10 +463,10 @@ Com paciência, com verdade,
 e com a mesma mão estendida todos os dias.`
   },
   {
-    mec:"luzes", n:5, rotulo:"Toque nos cuidados pequenos — são eles que ficam",
+    mec:"luzes", n:5, rotulo:"Toque nos cuidados pequenos, são eles que ficam",
     ecos:["te ouvir","lembrar","estar perto","ter paciência","te fazer rir"],
     titulo:"O carinho miúdo",
-    verso:"“O amor é paciente, é benigno... tudo sofre, tudo crê, tudo espera, tudo suporta.” — 1 Coríntios 13:4,7",
+    verso:"“O amor é paciente, é benigno... tudo sofre, tudo crê, tudo espera, tudo suporta.”", ref:"1 Coríntios 13:4,7",
     poema:`Todo o amor que cabe em mim é teu,
 e cabe muito mais do que eu consigo dizer.
 
@@ -470,7 +481,7 @@ quando ninguém está olhando.`
   {
     mec:"segurar", seg:6, rotulo:"Segure mais um pouco. Eu aguento esperar.",
     titulo:"A espera",
-    verso:"“Os que esperam no Senhor renovarão as suas forças.” — Isaías 40:31",
+    verso:"“Os que esperam no Senhor renovarão as suas forças.”", ref:"Isaías 40:31",
     poema:`Esperar por você não me cansa.
 Existe espera que desgasta;
 essa aqui me constrói.
@@ -484,14 +495,14 @@ Não é teimosia.
 dessas que a gente tem sobre pouquíssimas coisas na vida.`
   },
   {
-    mec:"arrastar", rotulo:"Arraste até o fim — é o caminho todo, não metade", texto:"aonde você for",
+    mec:"arrastar", rotulo:"Arraste até o fim, o caminho todo, não metade", texto:"aonde você for",
     titulo:"A promessa",
-    verso:"“Aonde quer que fores irei eu.” — Rute 1:16",
+    verso:"“Aonde quer que fores irei eu.”", ref:"Rute 1:16",
     poema:`Aonde você for, eu vou.
 
 No dia bom eu estou.
 No dia em que você não quiser falar com ninguém,
-eu também estou — só mais quieto.
+eu também estou, só mais quieto.
 No dia em que você achar que não merece,
 eu estou aí, discordando.
 
@@ -502,10 +513,10 @@ Eu prometo que não vai ser sozinha.`
     mec:"luzes", n:7, rotulo:"Sete manhãs. Toque em cada uma.",
     ecos:["de novo","de novo","de novo","de novo","de novo","de novo","sempre"],
     titulo:"Todo dia de novo",
-    verso:"“As misericórdias do Senhor se renovam a cada manhã.” — Lamentações 3:22-23",
+    verso:"“As misericórdias do Senhor se renovam a cada manhã.”", ref:"Lamentações 3:22,23",
     poema:`Se eu tivesse que te escolher
 uma vez a cada manhã,
-eu escolheria — e ainda sobraria vontade.
+eu escolheria, e ainda sobraria vontade.
 
 Não é impulso. Não é fase.
 É decisão repetida,
@@ -518,7 +529,7 @@ todo dia você.`
   {
     mec:"segurar", seg:7, rotulo:"Segure até o fim. Esse é o tamanho do para sempre.", final:true,
     titulo:"Para sempre",
-    verso:"“As muitas águas não poderiam apagar este amor.” — Cânticos 8:7",
+    verso:"“As muitas águas não poderiam apagar este amor.”", ref:"Cânticos 8:7",
     poema:`Então é isso.
 
 Eu vou estar aqui.
@@ -680,6 +691,23 @@ const Som = {
     if(!this.ctx || !this.ligado) return;
     this.nota(f, this.ctx.currentTime, 1.5, .1);
   },
+  /* fechou o programa: silêncio */
+  parar(){
+    if (this.trilha) this.trilha.pause();
+    if (this.timer){ clearInterval(this.timer); this.timer = null; }
+    if (this.orq){
+      const t = this.ctx.currentTime;
+      this.orq.gain.cancelScheduledValues(t);
+      this.orq.gain.setValueAtTime(this.orq.gain.value, t);
+      this.orq.gain.linearRampToValueAtTime(0, t + .6);
+    }
+  },
+  /* abriu de novo: a música volta de onde parou */
+  retomar(){
+    if (!this.ctx || !this.ligado) return;
+    if (this.usandoArquivo && this.trilha){ this.trilha.play().catch(()=>{}); return; }
+    this.cursor = 0; this.valsa();
+  },
   alternar(){
     this.ligado = !this.ligado;
     el("btnSom").textContent = this.ligado ? "♪" : "✕";
@@ -752,13 +780,13 @@ function abrirIcone(ic){
   if (ic.id === "exe") return janelaExe();
   if (ic.id === "txt") return janelaTexto("leia_me.txt", [
     `Oi${NOME ? ", " + NOME : ""}.`,
-    "Eu não sabia como te dizer tudo isso de uma vez — então eu escrevi em dez partes.",
+    "Eu não sabia como te dizer tudo isso de uma vez, então eu escrevi em dez partes.",
     "Fecha esse arquivo e abre o outro. Vai com calma, não tem pressa nenhuma.",
     "Leia até o fim, por favor."
   ]);
   if (ic.id === "fotos") return janelaTexto("nossas_conversas", [
     "Esta pasta está vazia por enquanto.",
-    "Mas eu guardo tudo — cada áudio, cada 'bom dia', cada coisa que você falou de passagem e achou que eu não ia lembrar.",
+    "Mas eu guardo tudo: cada áudio, cada 'bom dia', cada coisa que você falou de passagem e achou que eu não ia lembrar.",
     "Eu lembro de todas."
   ]);
   if (ic.id === "lixo") return janelaTexto("Lixeira", [
@@ -847,13 +875,36 @@ function pintarCeu(t){
 addEventListener("resize", ()=>{ if (ctx2) ceu(); });
 
 /* ── jogo ────────────────────────────────────────────── */
+let leuPrologo = false, ceuLigado = false;
 function comecarJogo(){
   jogo.hidden = false;
-  velasBox.innerHTML = NIVEIS.map(()=>`<i class="vela"></i>`).join("");
-  ceu(); requestAnimationFrame(pintarCeu);
-  montarNivel();
+  Som.retomar();
+  if (!velasBox.childElementCount) velasBox.innerHTML = NIVEIS.map(()=>`<i class="vela"></i>`).join("");
+  if (!ceuLigado){ ceuLigado = true; ceu(); requestAnimationFrame(pintarCeu); }
+  if (leuPrologo) montarNivel(); else prologo();
 }
-function sairJogo(){ jogo.hidden = true; }
+function sairJogo(){ jogo.hidden = true; Som.parar(); }
+
+/* a carta que abre tudo, antes do primeiro nível */
+function prologo(){
+  palco.innerHTML = "";
+  poemaBox.innerHTML = `
+    <div class="dentro">
+      <h2 class="fade">Antes de tudo</h2>
+      <p class="texto fade" style="animation-delay:.3s"><span class="estrofe">Isso aqui não é coisa de momento.
+Não é emoção de um dia só, dessas que passam quando a semana começa.
+E não é só hoje.</span><span class="estrofe">Depois que eu te vi pela primeira vez,
+depois que você dormiu nos meus braços,
+eu tive certeza.</span><span class="estrofe">Certeza de que eu não quero que seja mais ninguém.
+Eu quero você.</span><span class="estrofe">E se for preciso, eu grito por aí, pra quem quiser ouvir:
+o meu amor é todo seu.</span><span class="estrofe">Nada do que está escrito aqui vai diminuir amanhã.
+Só aumenta.
+E eu estou disposto a passar pelo que for pra te mostrar isso.</span></p>
+      <button class="botao fade" id="btnPrologo" style="animation-delay:1.1s">pode começar</button>
+    </div>`;
+  poemaBox.hidden = false; poemaBox.scrollTop = 0;
+  el("btnPrologo").addEventListener("click", ()=>{ leuPrologo = true; montarNivel(); });
+}
 el("btnSair").addEventListener("click", sairJogo);
 el("btnSom").addEventListener("click", ()=>Som.alternar());
 
@@ -934,7 +985,7 @@ function mecContar(d){
   let v = 0;
   wrap.querySelector(".joelho").addEventListener("click", ()=>{
     if (v >= d.alvo) return;
-    v = Math.min(v + 23 + Math.floor(Math.random()*40), d.alvo);
+    v = Math.min(v + 70 + Math.floor(Math.random()*60), d.alvo);  // ~10 toques até o alvo
     n.textContent = v.toLocaleString("pt-BR");
     Som.toque(520 + v/4);
     if (v >= d.alvo){ n.style.textShadow = "0 0 32px var(--vela)"; setTimeout(revelar, 800); }
@@ -990,7 +1041,7 @@ function revelar(){
   poemaBox.innerHTML = `
     <div class="dentro">
       <h2 class="fade">${d.titulo}</h2>
-      <p class="verso fade" style="animation-delay:.25s">${d.verso}</p>
+      <p class="verso fade" style="animation-delay:.25s">${d.verso}<span class="ref">${d.ref}</span></p>
       <p class="texto fade" style="animation-delay:.5s">${estrofes}</p>
       <p class="assina fade" style="animation-delay:.9s">${romano(nivel+1)} de X</p>
       <button class="botao fade" id="btnSeguir" style="animation-delay:1.1s">${ultimo ? "e então?" : "continuar"}</button>
@@ -1017,7 +1068,7 @@ Só precisa saber que existe alguém
 que ora por você antes de dormir
 e que não vai a lugar nenhum.</span><span class="estrofe">Eu vou estar aqui.
 Demore o que demorar.</span></p>
-      <p class="assina fade" style="animation-delay:.8s">${NOME ? "para " + NOME + " — " : ""}de ${DE}</p>
+      <p class="assina fade" style="animation-delay:.8s">${NOME ? "para " + NOME + ", " : ""}de ${DE}</p>
       <button class="botao fade" id="btnReler" style="animation-delay:1s">ler tudo de novo</button>
     </div>`;
   poemaBox.hidden = false; poemaBox.scrollTop = 0;
