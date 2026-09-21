@@ -371,6 +371,8 @@ let DE   = "Mateus";    // quem assina
    index.html e ele toca em loop no jogo. Se o arquivo não existir
    (ou o navegador barrar), a valsa sintetizada entra no lugar.  */
 const MUSICA = "musica.mp3";
+/* Volume da música, de 0 a 1. Abaixe se ela estiver cobrindo os poemas. */
+const VOLUME_MUSICA = 0.22;
 /* ═══════════════════════════════════════════════════════ */
 
 const q = new URLSearchParams(location.search);
@@ -575,7 +577,7 @@ const VALSA = [
 ];
 
 const Som = {
-  ctx:null, master:null, eco:null, orq:null, ligado:true, timer:null, cursor:0,
+  ctx:null, master:null, eco:null, orq:null, fx:null, ligado:true, timer:null, cursor:0,
   trilha:null, usandoArquivo:false,
   iniciar(){
     if (this.ctx) return;
@@ -595,6 +597,10 @@ const Som = {
       // barramento só da valsa: dá pra apagá-la inteira com um fade
       this.orq = this.ctx.createGain(); this.orq.gain.value = 1;
       this.orq.connect(this.master); this.orq.connect(this.eco);
+      // barramento dos efeitos, separado: com a música do arquivo tocando,
+      // eles precisam de bem mais volume pra não sumirem debaixo dela
+      this.fx = this.ctx.createGain(); this.fx.gain.value = .3;
+      this.fx.connect(calor); this.fx.connect(this.eco);
       this.tentarArquivo();
     }catch(e){ this.ctx = null; }
   },
@@ -622,12 +628,18 @@ const Som = {
   },
   calarValsa(){
     if (this.timer){ clearInterval(this.timer); this.timer = null; }
-    if (!this.orq) return;
     const t = this.ctx.currentTime;
-    this.orq.gain.setValueAtTime(this.orq.gain.value, t);
-    this.orq.gain.linearRampToValueAtTime(0, t + 2.5);   // apaga tudo que já foi agendado
+    if (this.orq){
+      this.orq.gain.setValueAtTime(this.orq.gain.value, t);
+      this.orq.gain.linearRampToValueAtTime(0, t + 2.5); // apaga tudo que já foi agendado
+    }
+    // com a música por baixo, os efeitos sobem pra continuar audíveis
+    if (this.fx){
+      this.fx.gain.setValueAtTime(this.fx.gain.value, t);
+      this.fx.gain.linearRampToValueAtTime(1, t + 2.5);
+    }
   },
-  subirVolume(alvo=.5){                                  // entra em fade, sem susto
+  subirVolume(alvo=VOLUME_MUSICA){                       // entra em fade, sem susto
     const a = this.trilha; if (!a) return;
     let v = 0;
     const t = setInterval(()=>{
@@ -653,9 +665,7 @@ const Som = {
     g.gain.setValueAtTime(.0001, inicio);
     g.gain.exponentialRampToValueAtTime(volume, inicio + .02);
     g.gain.exponentialRampToValueAtTime(.0001, inicio + dur);
-    o.connect(g);
-    if (destino) g.connect(destino);
-    else { g.connect(this.master); g.connect(this.eco); }
+    o.connect(g); g.connect(destino || this.fx);
     o.start(inicio); o.stop(inicio + dur + .05);
   },
   /* cordas: entra devagar por baixo do piano */
@@ -689,7 +699,7 @@ const Som = {
   },
   toque(f=880){
     if(!this.ctx || !this.ligado) return;
-    this.nota(f, this.ctx.currentTime, 1.5, .1);
+    this.nota(f, this.ctx.currentTime, 1.5, .16);
   },
   /* fechou o programa: silêncio */
   parar(){
@@ -779,7 +789,7 @@ el("btnStart").addEventListener("click", ()=>{
 function abrirIcone(ic){
   if (ic.id === "exe") return janelaExe();
   if (ic.id === "txt") return janelaTexto("leia_me.txt", [
-    `Oi${NOME ? ", " + NOME : ""}.`,
+    "Ooi minha princesa.",
     "Eu não sabia como te dizer tudo isso de uma vez, então eu escrevi em dez partes.",
     "Fecha esse arquivo e abre o outro. Vai com calma, não tem pressa nenhuma.",
     "Leia até o fim, por favor."
