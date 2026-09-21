@@ -1,0 +1,1018 @@
+﻿<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Dez Orações</title><style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Dez Orações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;500&display=swap">
+<style>
+:root{
+  --noite:#08070F;
+  --veu:#151126;
+  --vidro:rgba(28,22,48,.72);
+  --vela:#E9B872;
+  --vela-forte:#FFD79B;
+  --rosa:#D9909C;
+  --pergaminho:#F3E9DB;
+  --pergaminho-fraco:rgba(243,233,219,.62);
+  --linha:rgba(233,184,114,.22);
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Jost",-apple-system,"Segoe UI",Roboto,sans-serif;
+  --win:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--noite);
+  color:var(--pergaminho);
+  font-family:var(--sans);
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--vela);outline-offset:3px;border-radius:4px}
+
+/* ══ camadas ══ */
+.tela{position:fixed;inset:0;display:flex;flex-direction:column}
+#jogo{z-index:40;background:var(--noite)}
+#janela-camada{z-index:30}
+#desktop{z-index:10}
+#ligando{z-index:60;background:#000;align-items:center;justify-content:center}
+[hidden]{display:none!important}
+
+/* ══ ligando o computador ══ */
+#ligando{gap:18px}
+.flicker{
+  width:min(62vw,240px);height:2px;background:var(--vela);
+  box-shadow:0 0 18px var(--vela);transform-origin:center;
+  animation:acender 1.1s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes acender{
+  0%{transform:scaleX(0);opacity:0}
+  35%{transform:scaleX(1);opacity:1}
+  60%{transform:scaleX(1) scaleY(1);opacity:1}
+  100%{transform:scaleX(1) scaleY(60);opacity:0}
+}
+#ligando p{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(243,233,219,.35);margin:0}
+
+/* ══ área de trabalho ══ */
+#desktop{
+  background:url("wallpaper.webp") center/cover no-repeat #0d1b2a;
+  justify-content:space-between;
+}
+#icones{
+  display:grid;grid-template-columns:repeat(auto-fill,84px);
+  gap:4px;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px 0;
+  align-content:start;font-family:var(--win);
+}
+.icone{
+  width:84px;padding:8px 4px 6px;border:1px solid transparent;border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;
+}
+.icone.sel{background:rgba(120,170,255,.28);border-color:rgba(160,200,255,.5);backdrop-filter:blur(4px)}
+.icone .glifo{width:40px;height:40px;display:grid;place-items:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.icone span{
+  font-size:11.5px;line-height:1.25;color:#fff;word-break:break-word;
+  text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.6);
+}
+.icone.destaque .glifo{animation:pulsar 2.6s ease-in-out infinite}
+@keyframes pulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+
+.dica{
+  position:absolute;pointer-events:none;
+  font-family:var(--win);font-size:11px;color:#1b1b1b;
+  background:#f7f7f7;border:1px solid #c9c9c9;border-radius:4px;
+  padding:4px 8px;box-shadow:0 4px 12px rgba(0,0,0,.35);
+  opacity:0;transition:opacity .25s;
+}
+.dica.on{opacity:1}
+
+/* barra de tarefas */
+#barra{
+  height:52px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  background:rgba(24,26,33,.78);backdrop-filter:blur(22px) saturate(1.4);
+  border-top:1px solid rgba(255,255,255,.07);
+  padding-bottom:env(safe-area-inset-bottom,0px);position:relative;
+  font-family:var(--win);
+}
+#barra .apps{display:flex;gap:6px;align-items:center}
+.tbtn{width:38px;height:38px;border-radius:6px;display:grid;place-items:center;transition:background .15s}
+.tbtn:hover{background:rgba(255,255,255,.09)}
+.tbtn.ativo{background:rgba(255,255,255,.12);position:relative}
+.tbtn.ativo::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:14px;height:2.5px;border-radius:2px;background:#79b8ff}
+#relogio{
+  position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);
+  text-align:right;font-size:11px;line-height:1.35;color:#eaeaea;
+}
+
+/* ══ janelas ══ */
+#janela-camada{align-items:center;justify-content:center;padding:14px;pointer-events:none}
+.janela{
+  pointer-events:auto;width:100%;max-width:520px;
+  background:#1f2027;border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  box-shadow:0 26px 70px rgba(0,0,0,.6);overflow:hidden;font-family:var(--win);
+  animation:abrirJanela .26s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes abrirJanela{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.titulo{
+  display:flex;align-items:center;gap:8px;height:36px;padding-left:12px;
+  background:#2b2c34;border-bottom:1px solid rgba(255,255,255,.07);
+  font-size:12.5px;color:#e6e6e6;
+}
+.titulo .nome{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctrl{width:40px;height:36px;display:grid;place-items:center;font-size:13px;color:#cfcfcf}
+.ctrl:hover{background:rgba(255,255,255,.08)}
+.ctrl.fechar:hover{background:#c42b1c;color:#fff}
+.corpo{padding:18px 16px 20px}
+
+/* bloco de notas */
+.bloco{background:#fbfbf7;color:#1d1d1d;padding:16px 14px;font-size:13.5px;line-height:1.65;min-height:150px}
+.bloco p{margin:0 0 10px}
+.bloco .cursor{display:inline-block;width:7px;height:15px;background:#1d1d1d;vertical-align:-2px;animation:pisca 1s steps(2) infinite}
+@keyframes pisca{50%{opacity:0}}
+
+/* instalador do executável */
+#term{
+  font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:12.5px;line-height:1.85;
+  color:#b9e6c8;min-height:132px;margin:0 0 16px;white-space:pre-wrap;
+}
+#term b{color:var(--vela-forte);font-weight:500}
+.barra-load{height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:18px}
+.barra-load i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rosa),var(--vela));transition:width .35s ease}
+.botao{
+  width:100%;padding:13px;border-radius:7px;background:var(--vela);color:#241704;
+  font-family:var(--sans);font-weight:500;font-size:14px;letter-spacing:.06em;text-transform:uppercase;
+  transition:transform .12s,filter .12s;
+}
+.botao:active{transform:scale(.98)}
+.botao:disabled{opacity:.35;cursor:default}
+
+/* ══ o jogo ══ */
+#jogo{
+  background:
+    radial-gradient(120% 80% at 50% 0%,#241a3d 0%,transparent 60%),
+    radial-gradient(90% 60% at 50% 100%,#2a1520 0%,transparent 65%),
+    var(--noite);
+}
+#ceu{position:absolute;inset:0;pointer-events:none}
+#topo{
+  flex:0 0 auto;display:flex;align-items:center;gap:12px;position:relative;z-index:6;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 10px;
+  background:linear-gradient(180deg,rgba(8,7,15,.96) 55%,rgba(8,7,15,0));
+}
+#velas{display:flex;gap:7px;flex:1;flex-wrap:wrap}
+.vela{
+  width:9px;height:9px;border-radius:50%;
+  background:rgba(243,233,219,.16);transition:background .5s,box-shadow .5s;
+}
+.vela.on{background:var(--vela);box-shadow:0 0 10px var(--vela)}
+.mini{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--linha);color:var(--pergaminho-fraco);font-size:13px;flex:0 0 auto;
+}
+#palco{
+  flex:1;position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:104px 22px 44px;min-height:0;
+}
+.rotulo{
+  position:absolute;top:6px;left:22px;right:22px;z-index:3;pointer-events:none;
+  font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;font-weight:400;line-height:1.9;
+  color:var(--pergaminho-fraco);margin:0;text-align:center;text-wrap:balance;
+}
+.rotulo .num{color:var(--vela);display:block;margin-bottom:9px;letter-spacing:.34em}
+
+/* mecânica: luzes */
+#zona{position:absolute;left:0;right:0;top:104px;bottom:24px}
+.luz{
+  position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+  background:radial-gradient(circle,var(--vela-forte) 0%,rgba(233,184,114,.5) 40%,transparent 70%);
+  animation:flutuar 4s ease-in-out infinite;
+}
+.luz::after{content:"";position:absolute;inset:-16px}
+@keyframes flutuar{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.luz.apagar{animation:estourar .5s ease-out forwards}
+@keyframes estourar{to{transform:scale(3.4);opacity:0}}
+.eco{
+  position:absolute;transform:translate(-50%,-50%);font-family:var(--serif);font-size:19px;
+  color:var(--vela-forte);pointer-events:none;animation:subir 1.6s ease-out forwards;white-space:nowrap;
+}
+@keyframes subir{0%{opacity:0;transform:translate(-50%,-50%)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-190%)}}
+
+/* mecânica: segurar */
+.segurar{position:relative;width:180px;height:180px;display:grid;place-items:center}
+.segurar svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.segurar circle{fill:none;stroke-width:2}
+.trilho{stroke:rgba(243,233,219,.13)}
+.arco{stroke:var(--vela);stroke-linecap:round;transition:stroke-dashoffset .1s linear}
+.coracao{font-size:34px;color:var(--rosa);transition:transform .3s,text-shadow .3s}
+.segurando .coracao{transform:scale(1.18);text-shadow:0 0 26px var(--rosa)}
+
+/* mecânica: contar */
+.contador{text-align:center}
+.contador .n{
+  font-family:var(--serif);font-size:clamp(54px,17vw,84px);line-height:1;color:var(--vela-forte);
+  font-variant-numeric:tabular-nums;display:block;margin-bottom:6px;
+}
+.contador .leg{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--pergaminho-fraco)}
+.joelho{
+  margin-top:30px;padding:15px 30px;border:1px solid var(--linha);border-radius:99px;
+  font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--vela);
+  transition:transform .1s,background .2s;
+}
+.joelho:active{transform:scale(.95);background:rgba(233,184,114,.12)}
+
+/* mecânica: medos */
+.medos{display:flex;flex-wrap:wrap;gap:11px;justify-content:center;max-width:380px}
+.medo{
+  font-family:var(--serif);font-size:17px;padding:10px 16px;border-radius:99px;
+  border:1px solid rgba(217,144,156,.35);color:rgba(243,233,219,.85);
+  background:rgba(217,144,156,.07);transition:transform .15s;
+}
+.medo:active{transform:scale(.94)}
+.medo.quebrado{animation:quebrar .55s ease-in forwards;pointer-events:none}
+@keyframes quebrar{
+  30%{transform:translateX(-3px) rotate(-2deg)}
+  60%{transform:translateX(3px) rotate(2deg)}
+  100%{opacity:0;transform:scale(.7) translateY(22px);filter:blur(5px)}
+}
+
+/* mecânica: arrastar */
+.trilha{
+  width:min(300px,78vw);height:62px;border-radius:99px;border:1px solid var(--linha);
+  background:rgba(243,233,219,.04);position:relative;display:grid;place-items:center;overflow:hidden;
+}
+.trilha .txt{
+  font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--pergaminho-fraco);
+  pointer-events:none;padding-left:34px;
+}
+.puxador{
+  position:absolute;left:5px;top:5px;width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(145deg,var(--vela-forte),var(--vela));color:#2b1b06;
+  display:grid;place-items:center;font-size:19px;touch-action:none;
+  box-shadow:0 0 22px rgba(233,184,114,.45);
+}
+
+/* ══ poema ══ */
+#poema{
+  position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 62px) 24px calc(env(safe-area-inset-bottom,0px) + 18px);
+  overflow-y:auto;background:linear-gradient(180deg,rgba(8,7,15,.96),rgba(8,7,15,.99));
+  -webkit-overflow-scrolling:touch;
+}
+#poema .dentro{margin:auto;width:100%;max-width:440px;padding:28px 0}
+#poema h2{
+  font-family:var(--serif);font-weight:600;font-size:clamp(28px,8vw,38px);line-height:1.12;
+  margin:0 0 14px;color:var(--pergaminho);text-wrap:balance;
+}
+#poema .verso{
+  font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.6;
+  color:var(--vela);margin:0 0 26px;padding-left:14px;border-left:1px solid var(--linha);
+}
+#poema .texto{
+  font-family:var(--serif);font-size:clamp(19px,5.2vw,22px);line-height:1.72;
+  color:var(--pergaminho);margin:0;white-space:pre-line;
+}
+#poema .texto .estrofe{display:block;margin-bottom:1.1em}
+#poema .assina{
+  margin-top:30px;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--pergaminho-fraco);
+}
+#poema .botao{margin-top:34px;max-width:300px}
+.fade{animation:surgir .9s ease-out both}
+@keyframes surgir{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ══ final ══ */
+#final{text-align:center}
+#final h2{font-size:clamp(32px,10vw,46px)}
+#final .coracaoGrande{font-size:52px;color:var(--rosa);display:block;margin-bottom:22px;animation:bater 2.2s ease-in-out infinite}
+@keyframes bater{0%,100%{transform:scale(1)}14%{transform:scale(1.16)}28%{transform:scale(1)}42%{transform:scale(1.11)}}
+#final .texto{text-align:left}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.05ms!important}
+}
+@media (min-height:760px){
+  #poema .texto{font-size:22px}
+}
+</style>
+
+<!-- ══════════ LIGANDO ══════════ -->
+<div class="tela" id="ligando">
+  <div class="flicker"></div>
+  <p>iniciando</p>
+</div>
+
+<!-- ══════════ ÁREA DE TRABALHO ══════════ -->
+<div class="tela" id="desktop" hidden>
+  <div id="icones"></div>
+  <div id="barra">
+    <div class="apps">
+      <button class="tbtn" id="btnStart" aria-label="Iniciar">
+        <svg width="19" height="19" viewBox="0 0 20 20" aria-hidden="true">
+          <rect x="0" y="0" width="9" height="9" fill="#4fb3ff"/><rect x="11" y="0" width="9" height="9" fill="#4fb3ff"/>
+          <rect x="0" y="11" width="9" height="9" fill="#4fb3ff"/><rect x="11" y="11" width="9" height="9" fill="#4fb3ff"/>
+        </svg>
+      </button>
+      <button class="tbtn" aria-label="Pesquisar">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#e9e9e9" stroke-width="1.6" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.8 12.8 L17.5 17.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="tbtn" aria-label="Arquivos">
+        <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true">
+          <path d="M2 5.5a1.5 1.5 0 0 1 1.5-1.5h5l2 2h8A1.5 1.5 0 0 1 20 7.5v9A1.5 1.5 0 0 1 18.5 18h-15A1.5 1.5 0 0 1 2 16.5z" fill="#ffca4b"/>
+        </svg>
+      </button>
+      <button class="tbtn" id="tbApp" aria-label="para_ela.exe" hidden>
+        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21s-7.5-4.7-9.4-9.2C1 8.4 3.1 4.8 6.6 4.8c2 0 3.5 1.1 4.4 2.4l1 1.4 1-1.4c.9-1.3 2.4-2.4 4.4-2.4 3.5 0 5.6 3.6 4 7-2 4.5-9.4 9.2-9.4 9.2z" fill="#ff6f8f"/>
+        </svg>
+      </button>
+    </div>
+    <div id="relogio"><div id="hora">--:--</div><div id="data">--/--/----</div></div>
+  </div>
+  <div class="dica" id="dica"></div>
+</div>
+
+<!-- ══════════ JANELAS ══════════ -->
+<div class="tela" id="janela-camada" hidden></div>
+
+<!-- ══════════ JOGO ══════════ -->
+<div class="tela" id="jogo" hidden>
+  <canvas id="ceu"></canvas>
+  <div id="topo">
+    <div id="velas" aria-label="progresso"></div>
+    <button class="mini" id="btnSom" aria-label="Som" title="Som">♪</button>
+    <button class="mini" id="btnSair" aria-label="Fechar" title="Fechar">✕</button>
+  </div>
+  <div id="palco"></div>
+  <div id="poema" hidden></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   EDITE AQUI  (ou use o link: ?nome=Ana&de=Mateus)
+   ═══════════════════════════════════════════════════════ */
+let NOME = "Julia";     // o nome dela
+let DE   = "Mateus";    // quem assina
+
+/* Música: coloque um arquivo chamado musica.mp3 na mesma pasta deste
+   index.html e ele toca em loop no jogo. Se o arquivo não existir
+   (ou o navegador barrar), a valsa sintetizada entra no lugar.  */
+const MUSICA = "musica.mp3";
+/* ═══════════════════════════════════════════════════════ */
+
+const q = new URLSearchParams(location.search);
+if (q.get("nome")) NOME = q.get("nome");
+if (q.get("de"))   DE   = q.get("de");
+
+const ARQUIVO = NOME ? `para_${NOME.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,"")}.exe` : "para_ela.exe";
+
+/* ── os 10 níveis ────────────────────────────────────── */
+const NIVEIS = [
+  {
+    mec:"luzes", n:3, rotulo:"Toque nas três luzes que ficaram acesas por você",
+    ecos:["uma prece","outra prece","mais uma"],
+    titulo:"Antes de te conhecer",
+    verso:"“Antes que eu te formasse no ventre materno, eu já te conhecia.” — Jeremias 1:5",
+    poema:`Antes de eu saber o teu nome,
+eu já sabia o teu lugar:
+era aquele espaço quieto no peito
+que ninguém nunca soube ocupar.
+
+Deus te conheceu antes de mim.
+Te desenhou sem pressa,
+escolheu o teu riso, o teu jeito de olhar de lado,
+e guardou pra depois —
+pra quando eu já estivesse pronto
+pra saber cuidar.`
+  },
+  {
+    mec:"contar", alvo:1000, rotulo:"Quantas vezes eu orei por você? Toque e descubra",
+    legenda:"orações", botao:"orar de novo",
+    titulo:"Quantas vezes eu orei",
+    verso:"“Deleita-te também no Senhor, e Ele te concederá o que deseja o teu coração.” — Salmos 37:4",
+    poema:`Eu perdi a conta dos joelhos no chão.
+Foram madrugadas inteiras pedindo por alguém
+que eu ainda nem sabia que existia.
+Eu dizia: Senhor, se ela existir,
+cuida dela hoje por mim.
+
+Quando você apareceu,
+eu entendi que Ele estava ouvindo esse tempo todo.
+Só estava te preparando com o capricho
+de quem não faz nada às pressas.`
+  },
+  {
+    mec:"arrastar", rotulo:"Arraste devagar — como quem abre uma cortina", texto:"abrir",
+    titulo:"Achei",
+    verso:"“Achei aquele a quem a minha alma ama.” — Cânticos 3:4",
+    poema:`Eu li esse versículo a vida inteira
+sem entender direito o verbo.
+
+Achar não é sorte.
+Achar é quando o coração reconhece
+o que já era dele
+antes de qualquer apresentação.
+
+Foi exatamente o que aconteceu:
+eu não te conheci.
+Eu te reconheci.`
+  },
+  {
+    mec:"segurar", seg:4, rotulo:"Segure. Sem pressa nenhuma.",
+    titulo:"O tempo",
+    verso:"“Tudo fez formoso no seu devido tempo.” — Eclesiastes 3:11",
+    poema:`Eu não tenho pressa nenhuma com você.
+Pode demorar o quanto precisar demorar.
+Eu não cheguei aqui atrás de um sim rápido —
+eu cheguei aqui pra ficar.
+
+Se for preciso um mês, eu espero.
+Se for preciso um ano, eu espero.
+Porque tudo que é feito com pressa
+tem o tamanho da pressa,
+e eu quero que a gente tenha o tamanho do tempo.`
+  },
+  {
+    mec:"medos", rotulo:"Toque em cada um. Eu quebro todos.",
+    itens:["medo de recomeçar","medo de confiar","medo de se decepcionar","medo de não ser prioridade","medo de amar de novo"],
+    titulo:"Os medos",
+    verso:"“No amor não há medo; antes o perfeito amor lança fora o medo.” — 1 João 4:18",
+    poema:`Eu sei que tem medo aí dentro.
+Medo de se abrir de novo,
+de confiar e ter que recolher os pedaços sozinha.
+
+Então deixa eu te dizer uma coisa:
+eu não vim brigar com o teu medo,
+eu vim ficar do teu lado até ele cansar.
+
+Um por um eu quebro todos.
+Com paciência, com verdade,
+e com a mesma mão estendida todos os dias.`
+  },
+  {
+    mec:"luzes", n:5, rotulo:"Toque nos cuidados pequenos — são eles que ficam",
+    ecos:["te ouvir","lembrar","estar perto","ter paciência","te fazer rir"],
+    titulo:"O carinho miúdo",
+    verso:"“O amor é paciente, é benigno... tudo sofre, tudo crê, tudo espera, tudo suporta.” — 1 Coríntios 13:4,7",
+    poema:`Todo o amor que cabe em mim é teu,
+e cabe muito mais do que eu consigo dizer.
+
+É te escutar no dia ruim sem querer consertar nada,
+é lembrar do que você falou de passagem,
+é o carinho miúdo, o de segunda-feira,
+o que não vira foto nem história pra contar.
+
+Amor bonito é o que aparece
+quando ninguém está olhando.`
+  },
+  {
+    mec:"segurar", seg:6, rotulo:"Segure mais um pouco. Eu aguento esperar.",
+    titulo:"A espera",
+    verso:"“Os que esperam no Senhor renovarão as suas forças.” — Isaías 40:31",
+    poema:`Esperar por você não me cansa.
+Existe espera que desgasta;
+essa aqui me constrói.
+
+Enquanto você caminha no teu tempo,
+eu fico aqui, inteiro, no mesmo lugar,
+sem pressa e sem desistir.
+
+Não é teimosia.
+É certeza mansa,
+dessas que a gente tem sobre pouquíssimas coisas na vida.`
+  },
+  {
+    mec:"arrastar", rotulo:"Arraste até o fim — é o caminho todo, não metade", texto:"aonde você for",
+    titulo:"A promessa",
+    verso:"“Aonde quer que fores irei eu.” — Rute 1:16",
+    poema:`Aonde você for, eu vou.
+
+No dia bom eu estou.
+No dia em que você não quiser falar com ninguém,
+eu também estou — só mais quieto.
+No dia em que você achar que não merece,
+eu estou aí, discordando.
+
+Eu não prometo que vai ser fácil.
+Eu prometo que não vai ser sozinha.`
+  },
+  {
+    mec:"luzes", n:7, rotulo:"Sete manhãs. Toque em cada uma.",
+    ecos:["de novo","de novo","de novo","de novo","de novo","de novo","sempre"],
+    titulo:"Todo dia de novo",
+    verso:"“As misericórdias do Senhor se renovam a cada manhã.” — Lamentações 3:22-23",
+    poema:`Se eu tivesse que te escolher
+uma vez a cada manhã,
+eu escolheria — e ainda sobraria vontade.
+
+Não é impulso. Não é fase.
+É decisão repetida,
+igual às misericórdias que se renovam:
+
+todo dia novas,
+todo dia inteiras,
+todo dia você.`
+  },
+  {
+    mec:"segurar", seg:7, rotulo:"Segure até o fim. Esse é o tamanho do para sempre.", final:true,
+    titulo:"Para sempre",
+    verso:"“As muitas águas não poderiam apagar este amor.” — Cânticos 8:7",
+    poema:`Então é isso.
+
+Eu vou estar aqui.
+Se demorar, eu estou.
+Se você tropeçar, eu estou.
+Se um dia você duvidar de você,
+eu lembro pra você quem você é.
+
+Todo o amor e todo o carinho
+que existem dentro de mim
+têm o teu nome.
+
+E vão continuar tendo.`
+  }
+];
+
+/* ── elementos ───────────────────────────────────────── */
+const el = (id) => document.getElementById(id);
+const desktop = el("desktop"), camada = el("janela-camada"), jogo = el("jogo");
+const palco = el("palco"), poemaBox = el("poema"), velasBox = el("velas");
+let nivel = 0;
+
+/* ── som (WebAudio, sem arquivos externos) ───────────── */
+/* Valsa em 6/8 — melodia original, piano e cordas sintetizados na hora.
+   Sol maior: G · D/F# · Em · C · G · D · Em · C-D
+   Cada compasso tem 6 colcheias: baixo no 1, acordes no 3 e no 5,
+   melodia por cima [nota, colcheia de entrada, duração em colcheias]. */
+const COLCHEIA = 0.32;
+const COMPASSO = COLCHEIA * 6;
+const N = { G2:98.00, FS2:92.50, E2:82.41, C3:130.81, D3:146.83,
+            G3:196.00, B3:246.94, D4:293.66, E4:329.63, FS4:369.99, A4:440.00,
+            G4:392.00, C4:261.63, B4:493.88, C5:523.25, D5:587.33, E5:659.25,
+            FS5:739.99, G5:783.99 };
+const VALSA = [
+  { baixo:N.G2,  acorde:[N.G3,N.B3,N.D4],  melodia:[[N.D5,0,3],[N.B4,3,3]] },
+  { baixo:N.FS2, acorde:[N.D4,N.FS4,N.A4], melodia:[[N.A4,0,3],[N.B4,3,2],[N.D5,5,1]] },
+  { baixo:N.E2,  acorde:[N.G3,N.B3,N.E4],  melodia:[[N.G4,0,3],[N.B4,3,3]] },
+  { baixo:N.C3,  acorde:[N.C4,N.E4,N.G4],  melodia:[[N.E5,0,4],[N.D5,4,2]] },
+  { baixo:N.G2,  acorde:[N.G3,N.B3,N.D4],  melodia:[[N.B4,0,2],[N.D5,2,2],[N.G5,4,2]] },
+  { baixo:N.D3,  acorde:[N.D4,N.FS4,N.A4], melodia:[[N.FS5,0,3],[N.E5,3,3]] },
+  { baixo:N.E2,  acorde:[N.G3,N.B3,N.E4],  melodia:[[N.D5,0,3],[N.B4,3,3]] },
+  { baixo:N.C3,  acorde:[N.C4,N.E4,N.G4],  melodia:[[N.C5,0,3],[N.D5,3,3]] }
+];
+
+const Som = {
+  ctx:null, master:null, eco:null, ligado:true, timer:null, cursor:0,
+  trilha:null, usandoArquivo:false,
+  iniciar(){
+    if (this.ctx) return;
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 0.17;
+      const calor = this.ctx.createBiquadFilter();        // tira o brilho duro
+      calor.type = "lowpass"; calor.frequency.value = 2600; calor.Q.value = .4;
+      const atraso = this.ctx.createDelay(1), volta = this.ctx.createGain();
+      atraso.delayTime.value = .36; volta.gain.value = .28; // eco curto: ar de sala
+      atraso.connect(volta); volta.connect(atraso);
+      this.eco = this.ctx.createGain(); this.eco.gain.value = .3;
+      this.eco.connect(atraso); atraso.connect(calor);
+      this.master.connect(calor); calor.connect(this.ctx.destination);
+      this.tentarArquivo();
+    }catch(e){ this.ctx = null; }
+  },
+  /* tenta a música da pasta; se não houver, toca a valsa sintetizada */
+  tentarArquivo(){
+    if (!MUSICA) return this.valsa();
+    const a = new Audio(MUSICA);
+    a.loop = true; a.volume = 0; a.preload = "auto";
+    let decidido = false;
+    const usar = () => {
+      if (decidido) return; decidido = true;
+      this.trilha = a; this.usandoArquivo = true; this.subirVolume();
+    };
+    const desistir = () => { if (decidido) return; decidido = true; this.valsa(); };
+    a.addEventListener("playing", usar, {once:true});
+    a.addEventListener("error", desistir, {once:true});
+    a.play().catch(desistir);
+    setTimeout(()=>{ if (!decidido) desistir(); }, 3000);
+  },
+  subirVolume(alvo=.5){                                  // entra em fade, sem susto
+    const a = this.trilha; if (!a) return;
+    let v = 0;
+    const t = setInterval(()=>{
+      v = Math.min(v + alvo/40, alvo); a.volume = v;
+      if (v >= alvo) clearInterval(t);
+    }, 60);
+  },
+  valsa(){
+    if (this.timer) return;
+    this.volta();
+    this.timer = setInterval(()=>this.volta(), VALSA.length*COMPASSO*1000 - 500);
+  },
+  /* piano: ataque rápido, cauda longa */
+  nota(freq, inicio, dur, volume, comEco=true){
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = "triangle"; o.frequency.value = freq;
+    g.gain.setValueAtTime(.0001, inicio);
+    g.gain.exponentialRampToValueAtTime(volume, inicio + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, inicio + dur);
+    o.connect(g); g.connect(this.master);
+    if (comEco) g.connect(this.eco);
+    o.start(inicio); o.stop(inicio + dur + .05);
+  },
+  /* cordas: entra devagar por baixo do piano */
+  corda(freq, inicio, dur, volume){
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    o.detune.value = (Math.random()*7) - 3.5;             // desafina de leve: soa humano
+    g.gain.setValueAtTime(0, inicio);
+    g.gain.linearRampToValueAtTime(volume, inicio + 1.6);
+    g.gain.linearRampToValueAtTime(0, inicio + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(inicio); o.stop(inicio + dur + .1);
+  },
+  volta(){
+    if (!this.ctx || !this.ligado) return;
+    const agora = this.ctx.currentTime;
+    if (this.cursor < agora + .1) this.cursor = agora + .15;
+    VALSA.forEach((c, i) => {
+      const t = this.cursor + i*COMPASSO;
+      this.nota(c.baixo, t, 2.6, .12, false);             // o "oom"
+      [2,4].forEach(p => c.acorde.forEach((f,k) =>        // o "pah pah"
+        this.nota(f, t + p*COLCHEIA, 1.5, .035/(k*.4+1), false)));
+      this.corda(c.baixo*2, t, COMPASSO*1.4, .04);        // almofada
+      c.melodia.forEach(([f, pos, comp]) => {
+        const q = t + pos*COLCHEIA;
+        this.nota(f, q, comp*COLCHEIA + 1.3, .105);
+        this.nota(f*2, q, .55, .016);                     // brilho do martelo
+      });
+    });
+    this.cursor += VALSA.length * COMPASSO;
+  },
+  toque(f=880){
+    if(!this.ctx || !this.ligado) return;
+    this.nota(f, this.ctx.currentTime, 1.5, .1);
+  },
+  alternar(){
+    this.ligado = !this.ligado;
+    el("btnSom").textContent = this.ligado ? "♪" : "✕";
+    el("btnSom").style.color = this.ligado ? "" : "rgba(243,233,219,.3)";
+    if (this.usandoArquivo && this.trilha){
+      if (this.ligado) this.trilha.play().catch(()=>{}); else this.trilha.pause();
+      return;
+    }
+    if (this.ligado){ this.cursor = 0; this.volta(); }
+  }
+};
+
+/* ── relógio da barra de tarefas ─────────────────────── */
+function relogio(){
+  const d = new Date();
+  el("hora").textContent = d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  el("data").textContent = d.toLocaleDateString("pt-BR");
+}
+relogio(); setInterval(relogio, 20000);
+
+/* ── ícones da área de trabalho ──────────────────────── */
+const ICONES = [
+  { id:"exe", nome:ARQUIVO, destaque:true, svg:`<svg width="38" height="38" viewBox="0 0 24 24"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9fb4"/><stop offset="1" stop-color="#e2405f"/></linearGradient></defs><path d="M12 21.2s-7.6-4.8-9.5-9.4C.9 8.3 3 4.6 6.6 4.6c2 0 3.5 1.1 4.4 2.4l1 1.4 1-1.4c.9-1.3 2.4-2.4 4.4-2.4 3.6 0 5.7 3.7 4.1 7.2-1.9 4.6-9.5 9.4-9.5 9.4z" fill="url(#g1)"/><path d="M8 9.2c.9-.6 2-.3 2.6.5" stroke="#fff" stroke-opacity=".7" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>` },
+  { id:"txt", nome:"leia_me.txt", svg:`<svg width="34" height="34" viewBox="0 0 24 24"><path d="M5 2.5h9l5 5v14H5z" fill="#fdfdfa" stroke="#c7c7c2" stroke-width=".8"/><path d="M14 2.5v5h5" fill="#e3e3dd"/><g stroke="#8d9aa8" stroke-width="1" stroke-linecap="round"><path d="M8 11h8M8 14h8M8 17h5"/></g></svg>` },
+  { id:"fotos", nome:"nossas_conversas", svg:`<svg width="38" height="38" viewBox="0 0 24 24"><path d="M2 6.2A1.6 1.6 0 0 1 3.6 4.6h5l2 2h9.8A1.6 1.6 0 0 1 22 8.2v9.6a1.6 1.6 0 0 1-1.6 1.6H3.6A1.6 1.6 0 0 1 2 17.8z" fill="#ffca4b"/><path d="M2 8.6h20v9.2a1.6 1.6 0 0 1-1.6 1.6H3.6A1.6 1.6 0 0 1 2 17.8z" fill="#ffd977"/></svg>` },
+  { id:"lixo", nome:"Lixeira", svg:`<svg width="34" height="34" viewBox="0 0 24 24"><path d="M6 7h12l-1 13.2a1.4 1.4 0 0 1-1.4 1.3H8.4A1.4 1.4 0 0 1 7 20.2z" fill="#b9d6e8" fill-opacity=".85" stroke="#8fb9d4" stroke-width=".8"/><rect x="4.6" y="4.4" width="14.8" height="2.4" rx="1.2" fill="#9ec4dc"/><g stroke="#7aa8c6" stroke-width="1"><path d="M10 10.5v8M14 10.5v8"/></g></svg>` }
+];
+
+const icones = el("icones");
+ICONES.forEach(ic=>{
+  const b = document.createElement("button");
+  b.className = "icone" + (ic.destaque ? " destaque" : "");
+  b.dataset.id = ic.id;
+  b.innerHTML = `<span class="glifo">${ic.svg}</span><span>${ic.nome}</span>`;
+  b.addEventListener("click", ()=>clicarIcone(b, ic));
+  icones.appendChild(b);
+});
+
+let selecionado = null;
+function clicarIcone(btn, ic){
+  if (selecionado === btn){ abrirIcone(ic); esconderDica(); return; }
+  document.querySelectorAll(".icone").forEach(i=>i.classList.remove("sel"));
+  btn.classList.add("sel"); selecionado = btn;
+  mostrarDica(btn, "toque de novo para abrir");
+}
+document.getElementById("desktop").addEventListener("click", (e)=>{
+  if (e.target.closest(".icone")) return;
+  document.querySelectorAll(".icone").forEach(i=>i.classList.remove("sel"));
+  selecionado = null; esconderDica();
+});
+
+const dica = el("dica");
+let dicaTimer;
+function mostrarDica(btn, txt){
+  const r = btn.getBoundingClientRect();
+  dica.textContent = txt;
+  dica.style.left = Math.min(r.left + 6, innerWidth - 170) + "px";
+  dica.style.top = (r.bottom + 4) + "px";
+  dica.classList.add("on");
+  clearTimeout(dicaTimer); dicaTimer = setTimeout(esconderDica, 2600);
+}
+function esconderDica(){ dica.classList.remove("on"); }
+
+el("btnStart").addEventListener("click", ()=>{
+  const b = document.querySelector('.icone[data-id="exe"]');
+  mostrarDica(b, "só tem um programa importante aqui →");
+});
+
+function abrirIcone(ic){
+  if (ic.id === "exe") return janelaExe();
+  if (ic.id === "txt") return janelaTexto("leia_me.txt", [
+    `Oi${NOME ? ", " + NOME : ""}.`,
+    "Eu não sabia como te dizer tudo isso de uma vez — então eu escrevi em dez partes.",
+    "Fecha esse arquivo e abre o outro. Vai com calma, não tem pressa nenhuma.",
+    "Leia até o fim, por favor."
+  ]);
+  if (ic.id === "fotos") return janelaTexto("nossas_conversas", [
+    "Esta pasta está vazia por enquanto.",
+    "Mas eu guardo tudo — cada áudio, cada 'bom dia', cada coisa que você falou de passagem e achou que eu não ia lembrar.",
+    "Eu lembro de todas."
+  ]);
+  if (ic.id === "lixo") return janelaTexto("Lixeira", [
+    "Vazia.",
+    "Aqui não entra nada que tenha a ver com você."
+  ]);
+}
+
+/* ── janelas ─────────────────────────────────────────── */
+function abrirJanela(titulo, htmlCorpo, aoFechar){
+  camada.hidden = false;
+  camada.innerHTML = `
+    <div class="janela" role="dialog" aria-label="${titulo}">
+      <div class="titulo"><span class="nome">${titulo}</span>
+        <button class="ctrl" aria-label="Minimizar">—</button>
+        <button class="ctrl" aria-label="Maximizar">▢</button>
+        <button class="ctrl fechar" aria-label="Fechar">✕</button>
+      </div>
+      ${htmlCorpo}
+    </div>`;
+  camada.querySelectorAll(".ctrl").forEach(b=>b.addEventListener("click", ()=>{
+    fecharJanela(); if (aoFechar) aoFechar();
+  }));
+  const tb = el("tbApp"); tb.hidden = false; tb.classList.add("ativo");
+}
+function fecharJanela(){
+  camada.hidden = true; camada.innerHTML = "";
+  const tb = el("tbApp"); tb.hidden = true; tb.classList.remove("ativo");
+}
+
+function janelaTexto(titulo, paragrafos){
+  abrirJanela(titulo, `<div class="bloco">${paragrafos.map(p=>`<p>${p}</p>`).join("")}<span class="cursor"></span></div>`);
+}
+
+const LINHAS = [
+  "> verificando coração ... <b>ok</b>",
+  "> carregando 10 orações ... <b>ok</b>",
+  "> quebrando medos ... <b>em andamento</b>",
+  "> tempo restante ... <b>o necessário</b>",
+  "> pronto."
+];
+function janelaExe(){
+  abrirJanela(ARQUIVO, `<div class="corpo">
+      <div id="term"></div>
+      <div class="barra-load"><i id="prog"></i></div>
+      <button class="botao" id="btnIniciar" disabled>abrindo...</button>
+    </div>`);
+  const term = el("term"), prog = el("prog"), btn = el("btnIniciar");
+  let i = 0;
+  const passo = setInterval(()=>{
+    term.innerHTML += LINHAS[i] + "\n";
+    prog.style.width = Math.round(((i+1)/LINHAS.length)*100) + "%";
+    if (++i >= LINHAS.length){
+      clearInterval(passo);
+      btn.disabled = false; btn.textContent = "começar";
+      btn.addEventListener("click", ()=>{ Som.iniciar(); fecharJanela(); comecarJogo(); });
+    }
+  }, 480);
+}
+
+/* ── céu estrelado (canvas) ──────────────────────────── */
+const cv = el("ceu"); let ctx2, estrelas = [];
+function ceu(){
+  ctx2 = cv.getContext("2d");
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
+  ctx2.setTransform(dpr,0,0,dpr,0,0);
+  estrelas = Array.from({length: 70}, ()=>({
+    x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+    r: Math.random()*1.3 + .3, f: Math.random()*Math.PI*2, v: .4 + Math.random()*.9
+  }));
+}
+function pintarCeu(t){
+  if (!ctx2) return;
+  ctx2.clearRect(0,0,innerWidth,innerHeight);
+  for (const s of estrelas){
+    const a = .25 + .55 * (0.5 + 0.5*Math.sin(t/1000*s.v + s.f));
+    ctx2.globalAlpha = a;
+    ctx2.fillStyle = "#F3E9DB";
+    ctx2.beginPath(); ctx2.arc(s.x, s.y, s.r, 0, 6.3); ctx2.fill();
+  }
+  ctx2.globalAlpha = 1;
+  requestAnimationFrame(pintarCeu);
+}
+addEventListener("resize", ()=>{ if (ctx2) ceu(); });
+
+/* ── jogo ────────────────────────────────────────────── */
+function comecarJogo(){
+  jogo.hidden = false;
+  velasBox.innerHTML = NIVEIS.map(()=>`<i class="vela"></i>`).join("");
+  ceu(); requestAnimationFrame(pintarCeu);
+  montarNivel();
+}
+function sairJogo(){ jogo.hidden = true; }
+el("btnSair").addEventListener("click", sairJogo);
+el("btnSom").addEventListener("click", ()=>Som.alternar());
+
+function marcarVelas(){
+  document.querySelectorAll(".vela").forEach((v,i)=>v.classList.toggle("on", i < nivel));
+}
+
+function montarNivel(){
+  const d = NIVEIS[nivel];
+  poemaBox.hidden = true; poemaBox.innerHTML = "";
+  marcarVelas();
+  palco.innerHTML = `<p class="rotulo fade"><span class="num">${romano(nivel+1)} de X</span>${d.rotulo}</p>`;
+  ({luzes:mecLuzes, segurar:mecSegurar, contar:mecContar, medos:mecMedos, arrastar:mecArrastar})[d.mec](d);
+}
+function romano(n){ return ["I","II","III","IV","V","VI","VII","VIII","IX","X"][n-1]; }
+
+/* mecânica 1 — luzes */
+function mecLuzes(d){
+  const zona = document.createElement("div");
+  zona.id = "zona"; palco.appendChild(zona);
+  let faltam = d.n;
+  for (let i = 0; i < d.n; i++){
+    const b = document.createElement("button");
+    b.className = "luz";
+    b.setAttribute("aria-label", "luz");
+    b.style.left = (13 + Math.random()*74) + "%";
+    b.style.top  = (8 + (i + Math.random()*.8) * (84 / d.n)) + "%";
+    b.style.animationDelay = (Math.random()*3) + "s";
+    b.addEventListener("click", ()=>{
+      if (b.classList.contains("apagar")) return;
+      b.classList.add("apagar");
+      Som.toque(700 + i*110);
+      const e = document.createElement("span");
+      e.className = "eco"; e.textContent = d.ecos[i] || "";
+      e.style.left = b.style.left; e.style.top = b.style.top;
+      zona.appendChild(e);
+      if (--faltam === 0) setTimeout(revelar, 900);
+    }, {once:false});
+    zona.appendChild(b);
+  }
+}
+
+/* mecânica 2 — segurar */
+function mecSegurar(d){
+  const wrap = document.createElement("div");
+  wrap.className = "segurar fade";
+  wrap.innerHTML = `
+    <svg viewBox="0 0 180 180" aria-hidden="true">
+      <circle class="trilho" cx="90" cy="90" r="84"/>
+      <circle class="arco" cx="90" cy="90" r="84" stroke-dasharray="528" stroke-dashoffset="528"/>
+    </svg>
+    <button class="coracao" aria-label="segure">♥</button>`;
+  palco.appendChild(wrap);
+  const arco = wrap.querySelector(".arco");
+  let t0 = null, raf = null, pronto = false;
+  const dur = d.seg * 1000;
+  const anda = (t)=>{
+    if (!t0) t0 = t;
+    const p = Math.min((t - t0) / dur, 1);
+    arco.style.strokeDashoffset = 528 * (1 - p);
+    if (p >= 1){ pronto = true; Som.toque(1046); revelar(); return; }
+    raf = requestAnimationFrame(anda);
+  };
+  const iniciar = (e)=>{ e.preventDefault(); if (pronto) return; wrap.classList.add("segurando"); t0=null; raf=requestAnimationFrame(anda); };
+  const parar = ()=>{ if (pronto) return; wrap.classList.remove("segurando"); cancelAnimationFrame(raf); t0=null; arco.style.strokeDashoffset = 528; };
+  wrap.addEventListener("pointerdown", iniciar);
+  addEventListener("pointerup", parar); addEventListener("pointercancel", parar);
+}
+
+/* mecânica 3 — contar */
+function mecContar(d){
+  const wrap = document.createElement("div");
+  wrap.className = "contador fade";
+  wrap.innerHTML = `<span class="n">0</span><span class="leg">${d.legenda}</span>
+    <button class="joelho">${d.botao}</button>`;
+  palco.appendChild(wrap);
+  const n = wrap.querySelector(".n");
+  let v = 0;
+  wrap.querySelector(".joelho").addEventListener("click", ()=>{
+    if (v >= d.alvo) return;
+    v = Math.min(v + 23 + Math.floor(Math.random()*40), d.alvo);
+    n.textContent = v.toLocaleString("pt-BR");
+    Som.toque(520 + v/4);
+    if (v >= d.alvo){ n.style.textShadow = "0 0 32px var(--vela)"; setTimeout(revelar, 800); }
+  });
+}
+
+/* mecânica 4 — medos */
+function mecMedos(d){
+  const wrap = document.createElement("div");
+  wrap.className = "medos fade";
+  let faltam = d.itens.length;
+  d.itens.forEach((m,i)=>{
+    const b = document.createElement("button");
+    b.className = "medo"; b.textContent = m;
+    b.addEventListener("click", ()=>{
+      if (b.classList.contains("quebrado")) return;
+      b.classList.add("quebrado");
+      Som.toque(320 + i*50);
+      if (--faltam === 0) setTimeout(revelar, 800);
+    });
+    wrap.appendChild(b);
+  });
+  palco.appendChild(wrap);
+}
+
+/* mecânica 5 — arrastar */
+function mecArrastar(d){
+  const wrap = document.createElement("div");
+  wrap.className = "trilha fade";
+  wrap.innerHTML = `<span class="txt">${d.texto}</span><button class="puxador" aria-label="arraste">→</button>`;
+  palco.appendChild(wrap);
+  const pux = wrap.querySelector(".puxador");
+  const max = () => wrap.clientWidth - 62;
+  let arrastando = false, x0 = 0, atual = 0, pronto = false;
+  pux.addEventListener("pointerdown", e=>{ if(pronto) return; arrastando = true; x0 = e.clientX - atual; pux.setPointerCapture(e.pointerId); });
+  pux.addEventListener("pointermove", e=>{
+    if (!arrastando || pronto) return;
+    atual = Math.max(0, Math.min(e.clientX - x0, max()));
+    pux.style.transform = `translateX(${atual}px)`;
+    if (atual >= max() - 3){ pronto = true; arrastando = false; Som.toque(990); setTimeout(revelar, 420); }
+  });
+  const solta = ()=>{ if (pronto || !arrastando) return; arrastando = false; atual = 0; pux.style.transition = "transform .35s"; pux.style.transform = "translateX(0)"; setTimeout(()=>pux.style.transition="",360); };
+  pux.addEventListener("pointerup", solta); pux.addEventListener("pointercancel", solta);
+  // acessível pelo teclado
+  pux.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pronto=true; pux.style.transition="transform .5s"; pux.style.transform=`translateX(${max()}px)`; setTimeout(revelar,560);} });
+}
+
+/* ── revelar o poema ─────────────────────────────────── */
+function revelar(){
+  const d = NIVEIS[nivel];
+  const ultimo = nivel === NIVEIS.length - 1;
+  const estrofes = d.poema.split(/\n\s*\n/).map(s=>`<span class="estrofe">${s}</span>`).join("");
+  poemaBox.innerHTML = `
+    <div class="dentro">
+      <h2 class="fade">${d.titulo}</h2>
+      <p class="verso fade" style="animation-delay:.25s">${d.verso}</p>
+      <p class="texto fade" style="animation-delay:.5s">${estrofes}</p>
+      <p class="assina fade" style="animation-delay:.9s">${romano(nivel+1)} de X</p>
+      <button class="botao fade" id="btnSeguir" style="animation-delay:1.1s">${ultimo ? "e então?" : "continuar"}</button>
+    </div>`;
+  poemaBox.hidden = false;
+  poemaBox.scrollTop = 0;
+  nivel++; marcarVelas();
+  el("btnSeguir").addEventListener("click", ()=>{
+    if (ultimo) return telaFinal();
+    montarNivel();
+  });
+}
+
+/* ── tela final ──────────────────────────────────────── */
+function telaFinal(){
+  palco.innerHTML = "";
+  poemaBox.innerHTML = `
+    <div class="dentro" id="final">
+      <span class="coracaoGrande">♥</span>
+      <h2 class="fade">Dez de dez</h2>
+      <p class="texto fade" style="animation-delay:.3s"><span class="estrofe">Eram dez, mas podiam ser mil.
+Eu ainda teria coisa pra te dizer.</span><span class="estrofe">Não precisa responder nada hoje.
+Só precisa saber que existe alguém
+que ora por você antes de dormir
+e que não vai a lugar nenhum.</span><span class="estrofe">Eu vou estar aqui.
+Demore o que demorar.</span></p>
+      <p class="assina fade" style="animation-delay:.8s">${NOME ? "para " + NOME + " — " : ""}de ${DE}</p>
+      <button class="botao fade" id="btnReler" style="animation-delay:1s">ler tudo de novo</button>
+    </div>`;
+  poemaBox.hidden = false; poemaBox.scrollTop = 0;
+  el("btnReler").addEventListener("click", ()=>{ nivel = 0; montarNivel(); });
+}
+
+/* ── boot ────────────────────────────────────────────── */
+function ligar(){
+  setTimeout(()=>{ el("ligando").hidden = true; desktop.hidden = false;
+    const b = document.querySelector('.icone[data-id="exe"]');
+    setTimeout(()=>mostrarDica(b, "abre esse aqui 💗"), 700);
+  }, 1300);
+}
+ligar();
+
+/* estado preservado entre atualizações da página */
+try{
+  window.claude?.hot?.snapshot?.(()=>({ nivel, aberto: !jogo.hidden }));
+}catch(e){}
+</script>
+</body></html>
